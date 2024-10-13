@@ -211,45 +211,65 @@ class CotizacionesController:
 
             
     def save_cotizacion_as_pdf(self):
-        self.save_cotizacion()  # Guardar la cotización en la base de datos
+        # Verificar si hay productos en la tabla
+        if self.view.cotizacionTable.rowCount() == 0:
+            QMessageBox.warning(self.view, "Advertencia", "No hay ningún producto seleccionado.")
+            return  # Salir del método si no hay productos
+        
+        # Preguntar al usuario si está seguro de guardar la cotización
+        confirm = QMessageBox.question(
+            self.view, 
+            "Confirmar Guardado", 
+            "¿Estás seguro de que deseas guardar esta cotización?", 
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
 
-        # Abrir un diálogo para seleccionar la ubicación y el nombre del archivo
-        options = QFileDialog.Options()
-        pdf_file, _ = QFileDialog.getSaveFileName(self.view, "Guardar Cotización", "", "PDF Files (*.pdf);;All Files (*)", options=options)
+        if confirm == QMessageBox.Yes:
+            self.save_cotizacion()  # Guardar la cotización en la base de datos
 
-        if pdf_file:  # Verifica que el usuario haya seleccionado un archivo
-            # Crear un objeto Canvas
-            c = canvas.Canvas(pdf_file, pagesize=letter)
-            width, height = letter  # Dimensiones de la página
+            # Abrir un diálogo para seleccionar la ubicación y el nombre del archivo
+            options = QFileDialog.Options()
+            pdf_file, _ = QFileDialog.getSaveFileName(self.view, "Guardar Cotización", "", "PDF Files (*.pdf);;All Files (*)", options=options)
 
-            # Escribir título
-            c.drawString(200, height - 50, "Cotización")
+            if pdf_file:  # Verifica que el usuario haya seleccionado un archivo
+                # Crear un objeto Canvas
+                c = canvas.Canvas(pdf_file, pagesize=letter)
+                width, height = letter  # Dimensiones de la página
 
-            # Escribir encabezados de la tabla
-            c.drawString(100, height - 100, "Producto")
-            c.drawString(300, height - 100, "Cantidad")
-            c.drawString(400, height - 100, "Precio S/. ")
-            c.drawString(500, height - 100, "Total")
+                # Escribir título
+                c.drawString(200, height - 50, "Cotización")
 
-            # Escribir los datos de la tabla
-            y_position = height - 120  # Posición inicial en Y para los datos
+                # Escribir encabezados de la tabla
+                c.drawString(100, height - 100, "Producto")
+                c.drawString(300, height - 100, "Cantidad")
+                c.drawString(400, height - 100, "Precio S/. ")
+                c.drawString(500, height - 100, "Total")
 
-            for row in range(self.view.cotizacionTable.rowCount()):
-                producto = self.view.cotizacionTable.item(row, 0).text()
-                cantidad = self.view.cotizacionTable.item(row, 1).text()
-                precio = self.view.cotizacionTable.item(row, 2).text()
-                total = self.view.cotizacionTable.item(row, 3).text()
+                # Escribir los datos de la tabla
+                y_position = height - 120  # Posición inicial en Y para los datos
 
-                c.drawString(100, y_position, producto)
-                c.drawString(300, y_position, cantidad)
-                c.drawString(400, y_position, precio)
-                c.drawString(500, y_position, total)
+                for row in range(self.view.cotizacionTable.rowCount()):
+                    producto = self.view.cotizacionTable.item(row, 0).text()
+                    cantidad = self.view.cotizacionTable.item(row, 1).text()
+                    precio = self.view.cotizacionTable.item(row, 2).text()
+                    total = self.view.cotizacionTable.item(row, 3).text()
 
-                y_position -= 20  # Espacio entre filas
+                    c.drawString(100, y_position, producto)
+                    c.drawString(300, y_position, cantidad)
+                    c.drawString(400, y_position, precio)
+                    c.drawString(500, y_position, total)
 
-            # Guardar el PDF
-            c.save()
+                    y_position -= 20  # Espacio entre filas
 
-            # Confirmar al usuario que se ha guardado el PDF
-            QMessageBox.information(self.view, "Guardado", "Cotización guardada como PDF.")
+                # Guardar el PDF
+                c.save()
                 
+                self.clear_table_and_fields()
+
+                # Confirmar al usuario que se ha guardado el PDF
+                QMessageBox.information(self.view, "Guardado", "Cotización guardada como PDF.")
+
+                
+
+                    
