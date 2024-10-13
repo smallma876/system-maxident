@@ -37,6 +37,9 @@ class IngresoController:
 
     def salir(self):
         self.view.close()
+        from controller.menu_controller import MenuWindow
+        self.menu_controller = MenuWindow()
+        self.menu_controller.view.show()
 
     def load_product(self):
         products = Productos.fetch_all()
@@ -99,18 +102,26 @@ class IngresoController:
                 if categoria:
                     break
 
-            # Paso 3: Pedir el stock
+                # Paso 3: Pedir el stock
             while True:
+                # Solicitar el stock del producto
                 stock, ok = QInputDialog.getInt(self.view, "REGISTRAR PRODUCTO", "STOCK DEL PRODUCTO:", 0, 0, 1000000)
+                
+                # Cancelar si no se ingresa el stock
                 if not ok:
-                    return  # Cancelar si no se ingresa el stock
+                    return  
+
                 # Opción de retroceder
-                result = QMessageBox.question(self.view, "CONFIRMAR", "¿ESTAS SEGURO DE LA CANTIDAD??",
-                                            QMessageBox.Yes | QMessageBox.Retry | QMessageBox.Cancel)
+                result = QMessageBox.question(self.view, "CONFIRMAR", "¿ESTÁS SEGURO DE LA CANTIDAD?", 
+                                            QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+
                 if result == QMessageBox.Yes:
-                    break  # Avanzar si está seguro
+                    # Si el usuario confirma, salir del bucle
+                    break  
                 elif result == QMessageBox.Cancel:
                     return  # Salir si el usuario cancela
+                # Si elige No, el bucle se repetirá y se pedirá el stock nuevamente.
+
 
             # Paso 4: Si la categoría es "PRODUCTO_VENTA", pedir el precio
             if categoria == "PRODUCTO_VENTA":
@@ -119,7 +130,7 @@ class IngresoController:
                     if not ok:
                         return  # Cancelar si no se ingresa el precio
                     result = QMessageBox.question(self.view, "CONFIRMARr", "¿ESTAS SEGURO DE ESTE PRECIO?",
-                                                QMessageBox.Yes | QMessageBox.Retry | QMessageBox.Cancel)
+                                                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
                     if result == QMessageBox.Yes:
                         break  # Avanzar si está seguro
                     elif result == QMessageBox.Cancel:
@@ -184,6 +195,7 @@ class IngresoController:
             if not ok or not nuevo_nombre:
                 return  # Cancelar si no se ingresa un nuevo nombre
             if nuevo_nombre != producto.nombre:  # Si hay un cambio
+                nuevo_nombre = nuevo_nombre.upper()
                 confirm = QMessageBox.question(self.view, "Confirmación", f"¿Está seguro que desea cambiar el nombre de '{producto.nombre}' a '{nuevo_nombre}'?", QMessageBox.Yes | QMessageBox.No)
                 if confirm == QMessageBox.No:
                     return  # Cancelar si el usuario no está de acuerdo

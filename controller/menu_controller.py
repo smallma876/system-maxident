@@ -29,14 +29,17 @@ class MenuWindow(QMainWindow):
     
     def show_cotizaciones_view(self):
         self.cotizacionescontroller = CotizacionesController()
+        self.view.close()
         self.cotizacionescontroller.view.show()
 
     def show_pedidos_view(self):
         self.pedidoscontroller = PedidosController()
+        self.view.close()
         self.pedidoscontroller.view.show()
    
     def show_product_management_view(self):
         self.product_controller = IngresoController()
+        self.view.close()
         self.product_controller.view.show()
 
 
