@@ -42,7 +42,6 @@ class DetalleCotizacionesController:
         self.view.tabla_cotizaciones.setRowCount(0)  # Reiniciar la tabla
 
         for cotizacion in cotizaciones:
-            print(f"Insertando cotización en la tabla: {cotizacion}")  # Imprime la cotización que se va a insertar
             rowPosition = self.view.tabla_cotizaciones.rowCount()
             self.view.tabla_cotizaciones.insertRow(rowPosition)
 

@@ -135,13 +135,8 @@ class CotizacionesController:
             self.clear_fields()
 
         except ValueError:
-            QMessageBox.warning(self.view, "Error de Datos", "Por favor, ingresa todos los datos correctamente.")
+            QMessageBox.warning(self.view, "ATENCION", "POR FAVOR, COMPLETA TODOS LOS CAMPOS.")
 
-
-    #def get_precio_producto(self, producto):
-        # Aquí implementas la lógica para obtener el precio de un producto específico
-       # return Productos.fetch_precio(producto)  # Debes implementar este método
-    
 
     def update_total(self):
         total_general = 0
@@ -264,7 +259,7 @@ class CotizacionesController:
 
                 # Guardar el PDF
                 c.save()
-                
+
                 self.clear_table_and_fields()
 
                 # Confirmar al usuario que se ha guardado el PDF

@@ -88,14 +88,6 @@ class Productos:
         return codigo[0] if codigo else None
 
         
-    
-
-    #def delete(codigo):
-        #conn = get_connection()
-        #cursor = conn.cursor()
-        #cursor.execute("DELETE FROM producto WHERE codigo = ?", (codigo,))
-        #conn.commit()
-        #conn.close()
 
     
   

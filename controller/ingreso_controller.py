@@ -145,7 +145,7 @@ class IngresoController:
             Productos.create(nombre, idcategoria, precio, stock)
             QMessageBox.information(self.view, "SISTEMA", "¡PRODUCTO AGREGADO CON EXITO!")
             self.load_product()
-
+            self.clear_fields()
         except ValueError:
             QMessageBox.warning(self.view, "ERROR DE DATOS", "PORFAVOR INGRESA TODOS LOS DATOS CORRECTAMENTE")
 
@@ -270,9 +270,6 @@ class IngresoController:
             self.view.productTable.setItem(rowPosition, 3, QTableWidgetItem(str(producto.precio)))
             self.view.productTable.setItem(rowPosition, 4, QTableWidgetItem(str(producto.stock)))
             
-            self.view.productTable.setColumnWidth(1, 230)
-            self.view.productTable.setColumnWidth(2, 160)
-            self.view.productTable.setColumnWidth(0, 70)
             
         else:
             QMessageBox.warning(self.view, "Error", "No se encontró el producto actualizado.")

@@ -51,7 +51,6 @@ class DetalleCotizaciones:
 
         resultados = []
         for row in rows:
-            print(f"Registro obtenido: {row}")  # Imprime cada fila obtenida
             resultados.append({
                 'idcotizacion': row[0],
                 'nombre_cliente': row[1],
