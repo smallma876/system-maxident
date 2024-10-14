@@ -1,3 +1,4 @@
+from decimal import Decimal, ROUND_HALF_UP
 from PyQt5.QtWidgets import QFileDialog
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
@@ -121,8 +122,8 @@ class CotizacionesController:
         try:
             producto = self.view.productoComboBox.currentText()
             cantidad = int(self.view.cantidadLineEdit.text())
-            precio_unitario = float(self.view.precioLineEdit.text())  # Ahora obtiene el precio del LineEdit
-            subtotal = cantidad * precio_unitario
+            precio_unitario = Decimal(self.view.precioLineEdit.text())  # Ahora obtiene el precio del LineEdit
+            subtotal = (precio_unitario * Decimal(cantidad)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) 
 
             self.view.cotizacionTable.insertRow(self.view.cotizacionTable.rowCount())
             rowPosition = self.view.cotizacionTable.rowCount() - 1
@@ -139,10 +140,13 @@ class CotizacionesController:
 
 
     def update_total(self):
-        total_general = 0
+        total_general = Decimal(0)
         for row in range(self.view.cotizacionTable.rowCount()):
-            total_general += float(self.view.cotizacionTable.item(row, 3).text())
+            total_general += Decimal(self.view.cotizacionTable.item(row, 3).text())
+        
+        total_general = total_general.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)  # Redondear a 2 decimales
         self.view.totalLineEdit.setText(str(total_general))
+
 
     def clear_fields(self):
         self.view.cantidadLineEdit.clear()  # Limpia el campo de cantidad
@@ -196,7 +200,7 @@ class CotizacionesController:
                 raise Exception(f"Producto '{nombre}' no encontrado.")
 
             cantidad = int(self.view.cotizacionTable.item(row, 1).text())
-            precio_unitario = float(self.view.cotizacionTable.item(row, 2).text())  # Cambié a la columna 3 para obtener el subtotal
+            precio_unitario = Decimal(self.view.cotizacionTable.item(row, 2).text())  # Cambié a la columna 3 para obtener el subtotal
             subtotal = float(self.view.cotizacionTable.item(row, 3).text()) 
 
             DetalleCotizaciones.agregar_detalle_cotizacion(idcotizaciones, codigo, cantidad, precio_unitario)
@@ -233,29 +237,36 @@ class CotizacionesController:
                 width, height = letter  # Dimensiones de la página
 
                 # Escribir título
-                c.drawString(200, height - 50, "Cotización")
+                c.drawString(200, height - 50, "Cotización Distribuidora Max&Dent")
 
                 # Escribir encabezados de la tabla
-                c.drawString(100, height - 100, "Producto")
-                c.drawString(300, height - 100, "Cantidad")
-                c.drawString(400, height - 100, "Precio S/. ")
-                c.drawString(500, height - 100, "Total")
+                c.drawString(80, height - 100, "Producto")  # Más espacio para Producto
+                c.drawString(350, height - 100, "Cantidad")  # Reducido
+                c.drawString(420, height - 100, "Precio S/.")  # Reducido
+                c.drawString(490, height - 100, "SubTotal")  # Reducido
 
                 # Escribir los datos de la tabla
                 y_position = height - 120  # Posición inicial en Y para los datos
+                total_general = 0  # Variable para almacenar el total general
 
                 for row in range(self.view.cotizacionTable.rowCount()):
                     producto = self.view.cotizacionTable.item(row, 0).text()
                     cantidad = self.view.cotizacionTable.item(row, 1).text()
                     precio = self.view.cotizacionTable.item(row, 2).text()
-                    total = self.view.cotizacionTable.item(row, 3).text()
+                    subtotal = self.view.cotizacionTable.item(row, 3).text()
 
-                    c.drawString(100, y_position, producto)
-                    c.drawString(300, y_position, cantidad)
-                    c.drawString(400, y_position, precio)
-                    c.drawString(500, y_position, total)
+                    c.drawString(80, y_position, producto)  # Más espacio para el nombre del producto
+                    c.drawString(350, y_position, cantidad)  # Columna más estrecha para cantidad
+                    c.drawString(420, y_position, precio)    # Columna más estrecha para precio
+                    c.drawString(490, y_position, subtotal)  # Columna más estrecha para subtotal
 
                     y_position -= 20  # Espacio entre filas
+                    total_general += float(subtotal)  # Sumar el subtotal al total general
+
+                # Escribir el total general al final
+                y_position -= 20  # Espacio adicional antes de escribir el total
+                c.drawString(420, y_position, "Total S/.")
+                c.drawString(490, y_position, f"{total_general:.2f}")  # Mostrar el total con dos decimales
 
                 # Guardar el PDF
                 c.save()
@@ -265,6 +276,4 @@ class CotizacionesController:
                 # Confirmar al usuario que se ha guardado el PDF
                 QMessageBox.information(self.view, "Guardado", "Cotización guardada como PDF.")
 
-                
-
-                    
+                        

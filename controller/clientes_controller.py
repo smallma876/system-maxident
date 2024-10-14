@@ -126,8 +126,8 @@ class ClientesController:
                 forma_entrega, ok = QInputDialog.getText(self.view, "REGISTRAR CLIENTE", "INGRESA SI ES A DOMICILIO O AGENCIA")
                 if not ok:
                     return  
-                if agencia_entrega:
-                    agencia_entrega = agencia_entrega.lower()
+                if forma_entrega:
+                    forma_entrega = forma_entrega.lower()
                 resultado = QMessageBox.question(self.view, "CONFIRMAR", "¿ESTAS SEGURO PARA CONFIRMAR ?", 
                                             QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
                 if resultado == QMessageBox.Yes:
@@ -172,11 +172,10 @@ class ClientesController:
         self.view.clienteagencia.clear() 
         self.view.clientedireccion.clear() 
         self.view.clienteformaentrega.clear() 
-
         self.cargar_clientes()
 
         
-    def table_cell_clicked(self,row,column):
+    def table_cell_clicked(self,row):
         idcliente = self.view.clientetable.item(row, 0).text()
         nombre = self.view.clientetable.item(row, 1).text()
         ruc_dni = self.view.clientetable.item(row, 2).text()
