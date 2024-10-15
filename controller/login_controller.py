@@ -29,7 +29,7 @@ class LoginController:
             self.show_menu()  
 
         else:
-            QMessageBox.warning(self.view, "Login","Revisa tus datos!!",QMessageBox.Ok)
+            QMessageBox.warning(self.view, "Login","USUARIO O CONTRASEÑA INCORRECTO",QMessageBox.Ok)
 
     def authenticate(self, username, password):
         conn = get_connection()

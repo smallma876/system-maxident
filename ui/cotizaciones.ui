@@ -146,9 +146,9 @@
     <property name="geometry">
      <rect>
       <x>120</x>
-      <y>180</y>
-      <width>161</width>
-      <height>16</height>
+      <y>170</y>
+      <width>171</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="font">
@@ -163,7 +163,7 @@
      <string notr="true"> background-color: none</string>
     </property>
     <property name="text">
-     <string>Precio Unitario </string>
+     <string>Precio por mayor</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_7">
@@ -201,7 +201,8 @@
     </property>
     <property name="font">
      <font>
-      <pointsize>12</pointsize>
+      <family>Arial</family>
+      <pointsize>14</pointsize>
      </font>
     </property>
     <property name="styleSheet">
@@ -220,7 +221,8 @@ color: rgb(255, 255, 255)</string>
     </property>
     <property name="font">
      <font>
-      <pointsize>12</pointsize>
+      <family>Arial</family>
+      <pointsize>14</pointsize>
      </font>
     </property>
     <property name="styleSheet">
@@ -234,25 +236,6 @@ color: rgb(255, 255, 255)</string>
       <x>650</x>
       <y>520</y>
       <width>111</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: rgb(91, 91, 91);
-color: rgb(255, 255, 255)</string>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="productoComboBox">
-    <property name="geometry">
-     <rect>
-      <x>410</x>
-      <y>130</y>
-      <width>431</width>
       <height>31</height>
      </rect>
     </property>
@@ -440,25 +423,6 @@ color: rgb(0, 0, 0)</string>
      <string>Guardar Cotizacion</string>
     </property>
    </widget>
-   <widget class="QComboBox" name="clienteComboBox">
-    <property name="geometry">
-     <rect>
-      <x>410</x>
-      <y>90</y>
-      <width>431</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: rgb(91, 91, 91);
-color: rgb(255, 255, 255)</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="exitButton">
     <property name="geometry">
      <rect>
@@ -527,6 +491,46 @@ color: rgb(0, 0, 0)</string>
       <pointsize>12</pointsize>
       <weight>50</weight>
       <bold>false</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(91, 91, 91);
+color: rgb(255, 255, 255)</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="productoLineEdit">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>130</y>
+      <width>431</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(91, 91, 91);
+color: rgb(255, 255, 255)</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="clienteLineEdit">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>90</y>
+      <width>431</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>14</pointsize>
      </font>
     </property>
     <property name="styleSheet">

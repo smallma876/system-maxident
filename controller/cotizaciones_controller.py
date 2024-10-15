@@ -1,22 +1,22 @@
 from decimal import Decimal, ROUND_HALF_UP
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QCompleter, QInputDialog, QTableWidget, QMessageBox, QTableWidgetItem
+from PyQt5.QtCore import QDate
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-from PyQt5.QtWidgets import QInputDialog, QTableWidget, QMessageBox, QTableWidgetItem
-from PyQt5.QtCore import QDate
 from views.cotizaciones_view import CotizacionesView 
 from model.detalle_cotizaciones import DetalleCotizaciones
 from model.cotizaciones import Cotizaciones
 from model.product import Productos  
 from model.clientes import Clientes
 from controller.detalle_cotizaciones_controller import DetalleCotizacionesController
+
 class CotizacionesController:
     def __init__(self):
         self.view = CotizacionesView()
         self.init_ui()
         self.productos = []
-        self.load_clientes()  # Cargar clientes en el comboBox
-        self.load_productos()  # Cargar productos en el comboBo
+        self.load_clientes()  # Cargar clientes en el QLineEdit
+        self.load_productos()  # Cargar productos en el QLineEdit
         self.view.guardarCotizacionButton.clicked.connect(self.save_cotizacion_as_pdf)
         self.view.addButton.clicked.connect(self.add_items_on_table)
         self.view.historialButton.clicked.connect(self.historial)
@@ -25,30 +25,35 @@ class CotizacionesController:
         self.view.cotizacionTable.cellClicked.connect(self.on_table_cell_clicked)
         self.view.exitButton.clicked.connect(self.exit)
 
-        # conectar el evento de selección de producto para que actualice el precio
-        self.view.productoComboBox.currentIndexChanged.connect(self.on_producto_changed)
+        self.view.productoLineEdit.textChanged.connect(self.on_producto_changed)
+        # Configurar QCompleter para productos y clientes
+        self.setup_completers()
+
+    def setup_completers(self):
+        # Para el QLineEdit de productos
+        productos_nombres = [producto.nombre for producto in self.productos]
+        completer_productos = QCompleter(productos_nombres, self.view.productoLineEdit)
+        completer_productos.setCaseSensitivity(False)
+        self.view.productoLineEdit.setCompleter(completer_productos)
+
+        # Para el QLineEdit de clientes
+        clientes_nombres = [cliente.nombre for cliente in Clientes.fetch_all()]
+        completer_clientes = QCompleter(clientes_nombres, self.view.clienteLineEdit)
+        completer_clientes.setCaseSensitivity(False)
+        self.view.clienteLineEdit.setCompleter(completer_clientes)
 
     def load_clientes(self):
-        
         clientes = Clientes.fetch_all()  
         for cliente in clientes:
-            self.view.clienteComboBox.addItem(cliente.nombre)
+            # Agregar cliente a una lista (no necesario en el QLineEdit)
+            pass
 
     def load_productos(self):
-       
         productos = Productos.fetch_all()  
         self.productos = productos  # Almacena la lista de productos
 
         # Ordenar los productos por nombre
         self.productos.sort(key=lambda producto: producto.nombre)  # Ordenar en orden alfabético
-        
-        for prod in productos:
-            self.view.productoComboBox.addItem(prod.nombre)  # Suponiendo que tienes un atributo 'nombre'      
-        
-        # Forzar la actualización del precio del primer producto
-        if self.view.productoComboBox.count() > 0:  # Verifica que haya productos
-            self.view.productoComboBox.setCurrentIndex(0)  # Selecciona el primer producto
-            self.on_producto_changed()  # Actualiza el precio
 
     def historial(self):
         self.show_historial_controller()
@@ -67,7 +72,7 @@ class CotizacionesController:
 
         self.view.fechaDateEdit.setCalendarPopup(True)  # Habilitar el popup del calendario
         self.view.fechaDateEdit.setDate(QDate.currentDate())
-    
+
     def delete_producto(self):
         # Obtener la fila seleccionada
         selected_row = self.view.cotizacionTable.currentRow()
@@ -88,39 +93,26 @@ class CotizacionesController:
         else:
             QMessageBox.warning(self.view, "Error", "Por favor, selecciona un producto para eliminar.")
     
-   
     def exit(self):
         self.view.close()
         from controller.menu_controller import MenuWindow
         self.menu_controller = MenuWindow()
         self.menu_controller.view.show()
 
-    '''def load_cotizaciones(self):
-        cotizaciones = Cotizaciones.fetch_all()
-        self.view.cotizacionTable.setRowCount(0) 
-        
-        for cotizacion in cotizaciones:
-            rowPosition = self.view.cotizacionTable.rowCount()
-            self.view.cotizacionTable.insertRow(rowPosition)
-            self.view.cotizacionTable.setItem(rowPosition, 0, QTableWidgetItem(str(cotizacion.id)))
-            self.view.cotizacionTable.setItem(rowPosition, 1, QTableWidgetItem(cotizacion.cliente))
-            self.view.cotizacionTable.setItem(rowPosition, 2, QTableWidgetItem(cotizacion.fecha))
-            self.view.cotizacionTable.setItem(rowPosition, 3, QTableWidgetItem(str(cotizacion.total)))'''
-
-    
     def on_producto_changed(self):
-        # Obtener el producto seleccionado
-        index = self.view.productoComboBox.currentIndex()
-        if index >= 0:  # Verifica que el índice sea válido
-            producto_seleccionado = self.productos[index]  # Obtén el producto de la lista
+        # Obtener el producto seleccionado desde el LineEdit
+        producto_text = self.view.productoLineEdit.text()
+        producto_seleccionado = next((producto for producto in self.productos if producto.nombre == producto_text), None)
+        
+        if producto_seleccionado:
             precio = producto_seleccionado.precio  # Asume que el objeto producto tiene el atributo 'precio'
-            self.view.precioLineEdit.setText(str(precio))  # Muestra el precio en el LineEdit (o donde corresponda)
+            self.view.precioLineEdit.setText(str(precio))  # Muestra el precio en el LineEdit
         else:
             self.view.precioLineEdit.clear()
 
     def add_items_on_table(self):
         try:
-            producto = self.view.productoComboBox.currentText()
+            producto = self.view.productoLineEdit.text()  # Cambiado a QLineEdit
             cantidad = int(self.view.cantidadLineEdit.text())
             precio_unitario = Decimal(self.view.precioLineEdit.text())  # Ahora obtiene el precio del LineEdit
             subtotal = (precio_unitario * Decimal(cantidad)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) 
@@ -138,7 +130,6 @@ class CotizacionesController:
         except ValueError:
             QMessageBox.warning(self.view, "ATENCION", "POR FAVOR, COMPLETA TODOS LOS CAMPOS.")
 
-
     def update_total(self):
         total_general = Decimal(0)
         for row in range(self.view.cotizacionTable.rowCount()):
@@ -147,38 +138,26 @@ class CotizacionesController:
         total_general = total_general.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)  # Redondear a 2 decimales
         self.view.totalLineEdit.setText(str(total_general))
 
-
     def clear_fields(self):
         self.view.cantidadLineEdit.clear()  # Limpia el campo de cantidad
-        self.view.productoComboBox.setCurrentIndex(-1)  # Resetea el ComboBox de productos
+        self.view.productoLineEdit.clear()  # Limpia el campo de producto
         self.view.precioLineEdit.clear()  # Limpia el campo de precio
-        
+        self.view.totalLineEdit.clear()
         
     def clear_table_and_fields(self):
-        # Limpiar todas las filas en la tabla de cotizaciones
-        # Limpiar campos de entrada
-        self.view.cantidadLineEdit.clear()
-        self.view.productoComboBox.setCurrentIndex(-1)
-        self.view.precioLineEdit.clear()
         self.view.cotizacionTable.setRowCount(0)
+        self.clear_fields()
 
     def on_table_cell_clicked(self, row, column):
         # Obtener los datos de la fila seleccionada
-        producto = self.view.cotizacionTable.item(row, 0).text()  # Suponiendo que el producto está en la primera columna
-        cantidad = self.view.cotizacionTable.item(row, 1).text()  # Suponiendo que la cantidad está en la segunda columna
-        precio = self.view.cotizacionTable.item(row, 2).text()  # Suponiendo que el precio está en la tercera columna
+        producto = self.view.cotizacionTable.item(row, 0).text()
+        cantidad = self.view.cotizacionTable.item(row, 1).text()
+        precio = self.view.cotizacionTable.item(row, 2).text()
 
-        # Encontrar el índice del producto en el ComboBox
-        index = self.view.productoComboBox.findText(producto)
-
-        if index != -1:
-            # Actualizar el ComboBox con el producto seleccionado
-            self.view.productoComboBox.setCurrentIndex(index)
-        
-        # Actualizar el LineEdit con el precio y la cantidad
-        self.view.precioLineEdit.setText(precio)
+        # Establecer el texto del LineEdit de producto
+        self.view.productoLineEdit.setText(producto)
         self.view.cantidadLineEdit.setText(cantidad)
-
+        self.view.precioLineEdit.setText(precio)
 
     def obtener_producto_codigo(self, nombre):
         codigo = Productos.obtener_productos(nombre)  # Aquí pasamos el nombre como argumento
@@ -187,7 +166,7 @@ class CotizacionesController:
         return None
 
     def save_cotizacion(self):
-        cliente = self.view.clienteComboBox.currentText()
+        cliente = self.view.clienteLineEdit.text()
         idcliente = Clientes.get_id_by_nombre(cliente)  # Obtén el ID del cliente
         fecha = self.view.fechaDateEdit.date().toString("yyyy-MM-dd")  # Formato de fecha para la base de datos
         idcotizaciones = Cotizaciones.create(idcliente, fecha)
@@ -243,7 +222,7 @@ class CotizacionesController:
         # Logo
         logo_path = "file:///D:/Proyectos/system-maxident/ui/Imagenes/Imagen%20de%20WhatsApp%202024-08-13%20a%20las%2020.52.17_e647f5ba.jpg"
         if logo_path:
-            c.drawImage(logo_path, 450, height - 100, width=100, height=80)
+            c.drawImage(logo_path, 430, height - 125, width=120, height=100)
 
         # Título
         c.setFillColorRGB(0, 0, 0.5)
@@ -282,10 +261,10 @@ class CotizacionesController:
             # Dibujar cada fila en el PDF
             c.setFont("Helvetica", 10)
             c.setFillColorRGB(0, 0, 0)  # Color del texto
-            c.drawString(60, y_position, producto)  # Columna Producto
-            c.drawString(370, y_position, cantidad)  # Columna Cantidad
+            c.drawString(50, y_position, producto)  # Columna Producto
+            c.drawString(375, y_position, cantidad)  # Columna Cantidad
             c.drawString(440, y_position, precio)  # Columna Precio S/
-            c.drawString(500, y_position, subtotal)  # Columna Subtotal
+            c.drawString(510, y_position, subtotal)  # Columna Subtotal
 
             # Acumular el subtotal al total general
             total_general += float(subtotal)
