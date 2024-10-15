@@ -143,7 +143,7 @@ class CotizacionesController:
         self.view.productoLineEdit.clear()  # Limpia el campo de producto
         self.view.precioLineEdit.clear()  # Limpia el campo de precio
         self.view.totalLineEdit.clear()
-        
+
     def clear_table_and_fields(self):
         self.view.cotizacionTable.setRowCount(0)
         self.clear_fields()
@@ -215,6 +215,10 @@ class CotizacionesController:
         if not file_path:
             return  # El usuario canceló el diálogo
 
+        # Obtener el nombre del cliente y su RUC/DNI
+        cliente_nombre = self.view.clienteLineEdit.text()
+        ruc_dni = Clientes.get_ruc_dni(cliente_nombre)  # Asegúrate de tener este método
+
         # Crear el lienzo (canvas) para el PDF
         c = canvas.Canvas(file_path, pagesize=letter)
         width, height = letter  # Tamaño de página Carta
@@ -222,34 +226,45 @@ class CotizacionesController:
         # Logo
         logo_path = "file:///D:/Proyectos/system-maxident/ui/Imagenes/Imagen%20de%20WhatsApp%202024-08-13%20a%20las%2020.52.17_e647f5ba.jpg"
         if logo_path:
-            c.drawImage(logo_path, 430, height - 125, width=120, height=100)
+            c.drawImage(logo_path, 430, height - 185, width=120, height=100)
 
         # Título
-        c.setFillColorRGB(0, 0, 0.5)
-        c.setFont("Helvetica-Bold", 14)
-        c.drawString(50, height - 50, "Cotización Distribuidora MAX&DENT")
+        c.setFillColorRGB(0, 0.2, 0.4)
+        c.setFont("Helvetica-Bold", 40)
+        c.drawString(305, height - 65, "COTIZACIÓN")
 
-        # Fecha actual de la cotización (reorganizada)
+        # Fecha actual de la cotización
         c.setFillColorRGB(0, 0, 0)
         fecha_actual = QDate.currentDate().toString("dd/MM/yyyy")
-        c.setFont("Helvetica", 12)
-        c.drawString(50, height - 120, f"Fecha: {fecha_actual}")  # Mueve la fecha a la izquierda
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(50, height - 50, f"Fecha: {fecha_actual}")  # Mueve la fecha a la izquierda
+
+        # Título
+        c.setFillColorRGB(0, 0, 0)
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(50, height - 140, "COTIZACIÓN")
+
+        # Agregar el nombre del cliente y su RUC/DNI
+        c.setFillColorRGB(0, 0.2, 0.4)
+        c.setFont("Helvetica", 14)
+        c.drawString(50, height - 165, f"Cliente: {cliente_nombre}")  # Nombre del cliente
+        c.drawString(50, height - 185, f"RUC/DNI: {ruc_dni}")  # RUC/DNI del cliente
 
         # Encabezado de la tabla
         c.setFillColorRGB(0, 0.2, 0.4)  # Color azul oscuro
         c.setStrokeColorRGB(0, 0.2, 0.4)
-        c.rect(50, height - 150, 500, 20, fill=1)
+        c.rect(50, height - 220, 500, 20, fill=1)
 
         # Texto en blanco para el encabezado
         c.setFillColorRGB(1, 1, 1)  # Texto blanco
         c.setFont("Helvetica-Bold", 10)
-        c.drawString(60, height - 145, "Producto")  # Columna Producto
-        c.drawString(360, height - 145, "Cantidad")  # Columna Cantidad
-        c.drawString(430, height - 145, "Precio S/")  # Columna Precio S/
-        c.drawString(500, height - 145, "Subtotal")  # Columna Subtotal
+        c.drawString(60, height - 215, "Producto")  # Columna Producto
+        c.drawString(360, height - 215, "Cantidad")  # Columna Cantidad
+        c.drawString(430, height - 215, "Precio S/")  # Columna Precio S/
+        c.drawString(500, height - 215, "Subtotal")  # Columna Subtotal
 
         # Datos de la tabla
-        y_position = height - 170  # Posición inicial de las filas
+        y_position = height - 240  # Posición inicial de las filas
         total_general = 0  # Variable para almacenar el total general
 
         for row in range(self.view.cotizacionTable.rowCount()):
@@ -278,7 +293,7 @@ class CotizacionesController:
 
         # Total de la cotización
         c.setFont("Helvetica-Bold", 12)
-        c.drawString(425, y_position - 20, f"Monto Total: S/ {total_general:.2f}")  # Mostrar el total con dos decimales
+        c.drawString(420, y_position - 20, f"Monto Total: S/ {total_general:.2f}")  # Mostrar el total con dos decimales
 
         # Guardar el PDF
         c.save()
