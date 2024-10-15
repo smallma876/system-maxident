@@ -207,73 +207,107 @@ class CotizacionesController:
             total += subtotal  # Sumar al total
         
         Cotizaciones.update_total(idcotizaciones, total)
-
             
+    
     def save_cotizacion_as_pdf(self):
         # Verificar si hay productos en la tabla
         if self.view.cotizacionTable.rowCount() == 0:
             QMessageBox.warning(self.view, "Advertencia", "No hay ningún producto seleccionado.")
             return  # Salir del método si no hay productos
-        
+
         # Preguntar al usuario si está seguro de guardar la cotización
         confirm = QMessageBox.question(
-            self.view, 
-            "Confirmar Guardado", 
-            "¿Estás seguro de que deseas guardar esta cotización?", 
+            self.view,
+            "Confirmar Guardado",
+            "¿Estás seguro de que deseas guardar esta cotización?",
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
         )
-
         if confirm == QMessageBox.Yes:
-            self.save_cotizacion()  # Guardar la cotización en la base de datos
+            self.save_cotizacion()
 
-            # Abrir un diálogo para seleccionar la ubicación y el nombre del archivo
-            options = QFileDialog.Options()
-            pdf_file, _ = QFileDialog.getSaveFileName(self.view, "Guardar Cotización", "", "PDF Files (*.pdf);;All Files (*)", options=options)
+        elif confirm == QMessageBox.No:
+            return  # Salir si el usuario cancela
 
-            if pdf_file:  # Verifica que el usuario haya seleccionado un archivo
-                # Crear un objeto Canvas
-                c = canvas.Canvas(pdf_file, pagesize=letter)
-                width, height = letter  # Dimensiones de la página
+        # Elegir la ubicación para guardar el PDF
+        options = QFileDialog.Options()
+        file_path, _ = QFileDialog.getSaveFileName(self.view, "Guardar Cotización como PDF", "", "PDF Files (*.pdf)", options=options)
 
-                # Escribir título
-                c.drawString(200, height - 50, "Cotización Distribuidora Max&Dent")
+        if not file_path:
+            return  # El usuario canceló el diálogo
 
-                # Escribir encabezados de la tabla
-                c.drawString(80, height - 100, "Producto")  # Más espacio para Producto
-                c.drawString(350, height - 100, "Cantidad")  # Reducido
-                c.drawString(420, height - 100, "Precio S/.")  # Reducido
-                c.drawString(490, height - 100, "SubTotal")  # Reducido
+        # Crear el lienzo (canvas) para el PDF
+        c = canvas.Canvas(file_path, pagesize=letter)
+        width, height = letter  # Tamaño de página Carta
 
-                # Escribir los datos de la tabla
-                y_position = height - 120  # Posición inicial en Y para los datos
-                total_general = 0  # Variable para almacenar el total general
+        # Logo
+        logo_path = "file:///D:/Proyectos/system-maxident/ui/Imagenes/Imagen%20de%20WhatsApp%202024-08-13%20a%20las%2020.52.17_e647f5ba.jpg"
+        if logo_path:
+            c.drawImage(logo_path, 450, height - 100, width=100, height=80)
 
-                for row in range(self.view.cotizacionTable.rowCount()):
-                    producto = self.view.cotizacionTable.item(row, 0).text()
-                    cantidad = self.view.cotizacionTable.item(row, 1).text()
-                    precio = self.view.cotizacionTable.item(row, 2).text()
-                    subtotal = self.view.cotizacionTable.item(row, 3).text()
+        # Título
+        c.setFillColorRGB(0, 0, 0.5)
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(50, height - 50, "Cotización Distribuidora MAX&DENT")
 
-                    c.drawString(80, y_position, producto)  # Más espacio para el nombre del producto
-                    c.drawString(350, y_position, cantidad)  # Columna más estrecha para cantidad
-                    c.drawString(420, y_position, precio)    # Columna más estrecha para precio
-                    c.drawString(490, y_position, subtotal)  # Columna más estrecha para subtotal
+        # Fecha actual de la cotización (reorganizada)
+        c.setFillColorRGB(0, 0, 0)
+        fecha_actual = QDate.currentDate().toString("dd/MM/yyyy")
+        c.setFont("Helvetica", 12)
+        c.drawString(50, height - 120, f"Fecha: {fecha_actual}")  # Mueve la fecha a la izquierda
 
-                    y_position -= 20  # Espacio entre filas
-                    total_general += float(subtotal)  # Sumar el subtotal al total general
+        # Encabezado de la tabla
+        c.setFillColorRGB(0, 0.2, 0.4)  # Color azul oscuro
+        c.setStrokeColorRGB(0, 0.2, 0.4)
+        c.rect(50, height - 150, 500, 20, fill=1)
 
-                # Escribir el total general al final
-                y_position -= 20  # Espacio adicional antes de escribir el total
-                c.drawString(420, y_position, "Total S/.")
-                c.drawString(490, y_position, f"{total_general:.2f}")  # Mostrar el total con dos decimales
+        # Texto en blanco para el encabezado
+        c.setFillColorRGB(1, 1, 1)  # Texto blanco
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(60, height - 145, "Producto")  # Columna Producto
+        c.drawString(360, height - 145, "Cantidad")  # Columna Cantidad
+        c.drawString(430, height - 145, "Precio S/")  # Columna Precio S/
+        c.drawString(500, height - 145, "Subtotal")  # Columna Subtotal
 
-                # Guardar el PDF
-                c.save()
+        # Datos de la tabla
+        y_position = height - 170  # Posición inicial de las filas
+        total_general = 0  # Variable para almacenar el total general
 
-                self.clear_table_and_fields()
+        for row in range(self.view.cotizacionTable.rowCount()):
+            producto = self.view.cotizacionTable.item(row, 0).text()
+            cantidad = self.view.cotizacionTable.item(row, 1).text()
+            precio = self.view.cotizacionTable.item(row, 2).text()
+            subtotal = self.view.cotizacionTable.item(row, 3).text()
 
-                # Confirmar al usuario que se ha guardado el PDF
-                QMessageBox.information(self.view, "Guardado", "Cotización guardada como PDF.")
+            # Dibujar cada fila en el PDF
+            c.setFont("Helvetica", 10)
+            c.setFillColorRGB(0, 0, 0)  # Color del texto
+            c.drawString(60, y_position, producto)  # Columna Producto
+            c.drawString(370, y_position, cantidad)  # Columna Cantidad
+            c.drawString(440, y_position, precio)  # Columna Precio S/
+            c.drawString(500, y_position, subtotal)  # Columna Subtotal
+
+            # Acumular el subtotal al total general
+            total_general += float(subtotal)
+
+            y_position -= 20  # Avanzar la posición vertical para la siguiente fila
+
+            # Salto de página si se llena
+            if y_position < 50:
+                c.showPage()  # Iniciar una nueva página si se llega al final
+                y_position = height - 50  # Reiniciar la posición en la nueva página
+
+        # Total de la cotización
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(425, y_position - 20, f"Monto Total: S/ {total_general:.2f}")  # Mostrar el total con dos decimales
+
+        # Guardar el PDF
+        c.save()
+
+        # Limpiar la tabla y los campos
+        self.clear_table_and_fields()
+
+        # Mostrar mensaje de éxito
+        QMessageBox.information(self.view, "Éxito", "La cotización ha sido guardada como PDF.")
 
                         
