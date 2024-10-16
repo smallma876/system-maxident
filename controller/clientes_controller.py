@@ -1,15 +1,18 @@
-from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem ,QTableWidget, QInputDialog
+from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem ,QTableWidget, QInputDialog,QDialog
+from controller.editar_cliente import EditarClienteDialog
 from views.clientes_view import ClientesView
 from model.clientes import Clientes
+from controller.crear_cliente import CrearClienteDialog
 
 class ClientesController:
     def __init__(self):
         self.view = ClientesView()
         self.cargar_clientes()
+        
         self.view.boton_salir.clicked.connect(self.salir)
         self.view.boton_nuevo.clicked.connect(self.limpiar_celdas)
         self.view.boton_registrar.clicked.connect(self.registrar_cliente)
-        #self.view.boton_editar.clicked.connect(self.editar_cliente)
+        self.view.boton_editar.clicked.connect(self.editar_cliente)
         self.view.boton_buscar.clicked.connect(self.buscar_cliente)
         self.view.clientetable.cellClicked.connect(self.table_cell_clicked)
 
@@ -54,95 +57,56 @@ class ClientesController:
         # Establecer selección por filas
         self.view.clientetable.setSelectionBehavior(QTableWidget.SelectRows)
 
-    def registrar_cliente(self):
-        try:
-            # Paso 1: Pedir el nombre del cliente
-            while True:
-                nombre, ok = QInputDialog.getText(self.view, "REGISTRAR CLIENTE", "NOMBRE DEL CLIENTE:")
-                if not ok:
-                    return  # Cancelar si el usuario no ingresa el nombre
-                if nombre:  # Validar que el nombre no esté vacío
-                    nombre = nombre.upper()
-                    # Verificar si ya existe un CLIENTE con el mismo nombre
-                    existe_clientes = Clientes.search_by_name(nombre)
-                    if existe_clientes:
-                        QMessageBox.warning(self.view, "ATECION", "YA EXISTE UN CLIENTE CON ESE NOMBRE.")
-                        return  # No continuar con la creación si ya existe
-                    break
-            # Paso 2: Pedir el RUC o DNI, con validación
-            while True:
-                ruc_dni, ok = QInputDialog.getText(self.view, "REGISTRAR CLIENTE", "INGRESA EL NUMERO DE RUC O DNI:")
-                if not ok:
-                    return  # Cancelar si el usuario no ingresa el RUC o DNI
-                if ruc_dni.isdigit() and len(ruc_dni) in (8, 11):
-                    resultado = QMessageBox.question(self.view, "CONFIRMAR", "¿ESTÁS SEGURO DEL NÚMERO?", 
-                                                 QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
-                    if resultado == QMessageBox.Yes:
-                        break  # El número es correcto, salir del bucle
-                    elif resultado == QMessageBox.Cancel:
-                        return  # Cancelar si el usuario cancela la operación
-                else:
-                    QMessageBox.warning(self.view, "ERROR", "Número de RUC o DNI incorrecto. Debe tener 8 o 11 dígitos.")
-            
-            #paso 3: 
-            while True:
-                direccion, ok = QInputDialog.getText(self.view, "REGISTRAR CLIENTE", "INGRESA LA DIRECCION DEL CLIENTE:")
-                if not ok:
-                    return  
-                if direccion:
-                    direccion = direccion.lower()
-                resultado = QMessageBox.question(self.view, "CONFIRMAR", "¿ESTAS SEGURO DE LA DIRECCION ?", 
-                                            QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
-                if resultado == QMessageBox.Yes:
-                    break
-                elif resultado == QMessageBox.Cancel:
-                    return
-            
-            while True:
-                telefono, ok = QInputDialog.getInt(self.view, "REGISTRAR CLIENTE", "INGRESA EL NUMERO DE TELEFONO:", 0, 0,1000000000)
-                if not ok:
-                    return  
-                resultado = QMessageBox.question(self.view, "CONFIRMAR", "¿ESTAS SEGURO DEl NUMERO ?", 
-                                            QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
-                if resultado == QMessageBox.Yes:
-                    break
-                elif resultado == QMessageBox.Cancel:
-                    return
-                
-            while True:
-                agencia_entrega, ok = QInputDialog.getText(self.view, "REGISTRAR CLIENTE", "INGRESA LA AGENCIA PARA SU ENTREGA")
-                if not ok:
-                    return  
-                if agencia_entrega:
-                    agencia_entrega = agencia_entrega.lower()
-                resultado = QMessageBox.question(self.view, "CONFIRMAR", "¿ESTAS SEGURO DE LA AGENCIA ?", 
-                                            QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
-                if resultado == QMessageBox.Yes:
-                    break
-                elif resultado == QMessageBox.Cancel:
-                    return
-                
-            while True:
-                forma_entrega, ok = QInputDialog.getText(self.view, "REGISTRAR CLIENTE", "INGRESA SI ES A DOMICILIO O AGENCIA")
-                if not ok:
-                    return  
-                if forma_entrega:
-                    forma_entrega = forma_entrega.lower()
-                resultado = QMessageBox.question(self.view, "CONFIRMAR", "¿ESTAS SEGURO PARA CONFIRMAR ?", 
-                                            QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
-                if resultado == QMessageBox.Yes:
-                    break
-                elif resultado == QMessageBox.Cancel:
-                    return
-            
-            Clientes.create(nombre,telefono,direccion,agencia_entrega,ruc_dni,forma_entrega)
-            QMessageBox.information(self.view, "SISTEMA", "¡CLIENTE REGISTRADO CON EXITO!")
-            self.cargar_clientes()
-            self.limpiar_celdas()
-
-        except ValueError:
-            QMessageBox.warning(self.view, "ERROR DE DATOS", "PORFAVOR INGRESA TODOS LOS DATOS CORRECTAMENTE")
     
+    def registrar_cliente(self):
+        dialogo = CrearClienteDialog(self.view)
+        if dialogo.exec_() == QDialog.Accepted:
+            self.cargar_clientes()
+
+
+    
+    def editar_cliente(self):
+        # Verificar que hay un cliente seleccionado
+        row = self.view.clientetable.currentRow()
+        if row == -1:
+            QMessageBox.warning(self.view, "ERROR", "Por favor selecciona un cliente para editar.")
+            return
+
+        # Obtener datos actuales del cliente seleccionado
+        idcliente = self.view.clientetable.item(row, 0).text()
+        nombre_actual = self.view.clientetable.item(row, 1).text()
+        ruc_dni_actual = self.view.clientetable.item(row, 2).text()
+        direccion_actual = self.view.clientetable.item(row, 3).text()
+        telefono_actual = self.view.clientetable.item(row, 4).text()
+        agencia_entrega_actual = self.view.clientetable.item(row, 5).text()
+        forma_entrega_actual = self.view.clientetable.item(row, 6).text()
+
+        # Abrir el diálogo personalizado
+        dialogo = EditarClienteDialog(nombre_actual, ruc_dni_actual, direccion_actual, telefono_actual, agencia_entrega_actual, forma_entrega_actual, self.view)
+        if dialogo.exec_() == QDialog.Accepted:
+            # Obtener los valores del formulario
+            nuevo_nombre = dialogo.nombre_input.text().upper()
+            nuevo_ruc_dni = dialogo.ruc_dni_input.text()
+            nueva_direccion = dialogo.direccion_input.text()
+            nuevo_telefono = dialogo.telefono_input.text()
+            nueva_agencia_entrega = dialogo.agencia_entrega_input.text()
+            nueva_forma_entrega = dialogo.forma_entrega_input.text()
+
+            # Confirmar cambios
+            confirmar = QMessageBox.question(self.view, "Confirmar", "¿Seguro que deseas actualizar este cliente?", QMessageBox.Yes | QMessageBox.No)
+            if confirmar == QMessageBox.No:
+                return
+            
+
+            # Actualizar en la base de datos
+            Clientes.update(idcliente, nuevo_nombre, nuevo_telefono, nueva_direccion, nueva_agencia_entrega, nuevo_ruc_dni, nueva_forma_entrega)
+            QMessageBox.information(self.view, "Éxito", "Cliente actualizado correctamente.")
+
+            # Refrescar tabla
+            self.cargar_clientes()
+
+
+
     def buscar_cliente(self):
         nombre, ok = QInputDialog.getText(self.view, "BUSCAR PRODUCTO", "INGRESA EL NOMBRE DEL CLIENTE:")
         if ok and nombre:
