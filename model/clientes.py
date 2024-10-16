@@ -45,8 +45,8 @@ class Clientes:
     def update(idcliente, nombre, telefono, direccion, agencia_entrega, ruc_dni, forma_entrega):
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("UPDATE clientes SET nombre = ?, telefono = ?, direccion = ?, agencia_entrega = ?, ruc_dni = ?, forma_entrega = ? WHERE idcliente = ?",
-                       (nombre, telefono, direccion, agencia_entrega, idcliente, ruc_dni, forma_entrega))
+        cursor.execute("UPDATE clientes SET nombre = ?, telefono = ?, direccion = ?, agencia_entrega = ?, ruc_dni = ? , forma_entrega = ? WHERE idcliente = ?",
+                       (nombre, telefono, direccion, agencia_entrega, ruc_dni, forma_entrega, idcliente))
         conn.commit()
         conn.close()
 
