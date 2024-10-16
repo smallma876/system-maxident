@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QInputDialog
 from PyQt5.QtWidgets import QTableWidget
 from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem
 from views.product_management_view import ProductManagementView
+from controller.registrar_producto_dialog import RegistrarProductoDialog
 from model.product import Productos
 import openpyxl
 from PyQt5.QtWidgets import QFileDialog
@@ -11,7 +12,7 @@ class IngresoController:
         self.view = ProductManagementView()
         self.init_ui()
         self.load_product()
-        self.view.addButton.clicked.connect(self.add_product)
+        self.view.addButton.clicked.connect(self.mostrar_registrar_producto)
         self.view.salidaButton.clicked.connect(self.agregar_o_descontar)
         self.view.editButton.clicked.connect(self.update_product)
         self.view.BuscarButton.clicked.connect(self.search_product)
@@ -32,7 +33,7 @@ class IngresoController:
         self.view.idcategoriaInput.clear()
         
         # Añadir elementos al QComboBox con sus respectivos textos y valores
-        self.view.idcategoriaInput.addItem("PRODUCTO_VENTA", 1)  # "PRODUCTO_VENTA" con ID 1
+        self.view.idcategoriaInput.addItem("VENTA", 1)  # "VENTA" con ID 1
         self.view.idcategoriaInput.addItem("INSUMO", 2)
 
     def salir(self):
@@ -46,7 +47,7 @@ class IngresoController:
         
         # Diccionario para mapear IDs de categorías a nombres
         categoria_dict = {
-            1: "PRODUCTO_VENTA",
+            1: "VENTA",
             2: "INSUMO"
         }
 
@@ -75,80 +76,11 @@ class IngresoController:
         # Establecer selección por filas
         self.view.productTable.setSelectionBehavior(QTableWidget.SelectRows)
 
-
-    def add_product(self):
-        try:
-            # Paso 1: Pedir el nombre del producto
-            while True:
-                
-                nombre, ok = QInputDialog.getText(self.view, "REGISTRAR PRODUCTO", "NOMBRE DEL PRODUCTO:")
-                if not ok:
-                    return  # Cancelar si el usuario no ingresa el nombre
-                if nombre:  # Validar que el nombre no esté vacío
-                    nombre = nombre.upper()
-                    # Verificar si ya existe un producto con el mismo nombre
-                    existing_products = Productos.search_by_name(nombre)
-                    if existing_products:
-                        QMessageBox.warning(self.view, "PRODUCTO DUPLICADO", "YA EXISTE UN PRODUCTO CON ESE NOMBRE.")
-                        return  # No continuar con la creación si ya existe
-                    break
-
-            # Paso 2: Pedir la categoría (PRODUCTO_VENTA o INSUMO)
-            categorias = ["PRODUCTO_VENTA", "INSUMO"]
-            while True:
-                categoria, ok = QInputDialog.getItem(self.view, "REGISTRAR PRODUCTO", "SELECCIONA LA CATEGORIA:", categorias, 0, False)
-                if not ok:
-                    return  # Cancelar si no se selecciona una categoría
-                if categoria:
-                    break
-
-                # Paso 3: Pedir el stock
-            while True:
-                # Solicitar el stock del producto
-                stock, ok = QInputDialog.getInt(self.view, "REGISTRAR PRODUCTO", "STOCK DEL PRODUCTO:", 0, 0, 1000000)
-                
-                # Cancelar si no se ingresa el stock
-                if not ok:
-                    return  
-
-                # Opción de retroceder
-                result = QMessageBox.question(self.view, "CONFIRMAR", "¿ESTÁS SEGURO DE LA CANTIDAD?", 
-                                            QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
-
-                if result == QMessageBox.Yes:
-                    # Si el usuario confirma, salir del bucle
-                    break  
-                elif result == QMessageBox.Cancel:
-                    return  # Salir si el usuario cancela
-                # Si elige No, el bucle se repetirá y se pedirá el stock nuevamente.
-
-
-            # Paso 4: Si la categoría es "PRODUCTO_VENTA", pedir el precio
-            if categoria == "PRODUCTO_VENTA":
-                while True:
-                    precio, ok = QInputDialog.getDouble(self.view, "REGISTRAR PRODUCTO", "PRECIO DEL PRODUCTO:", 0, 0, 1000000, 2)
-                    if not ok:
-                        return  # Cancelar si no se ingresa el precio
-                    result = QMessageBox.question(self.view, "CONFIRMARr", "¿ESTAS SEGURO DE ESTE PRECIO?",
-                                                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
-                    if result == QMessageBox.Yes:
-                        break  # Avanzar si está seguro
-                    elif result == QMessageBox.Cancel:
-                        return  # Salir si el usuario cancela
-            else:
-                precio = 0.0  # Para "INSUMO", el precio será 0
-
-            # Mapear la categoría seleccionada al ID correspondiente
-            idcategoria = 1 if categoria == "PRODUCTO_VENTA" else 2
-
-            # Si no existe un producto con el mismo nombre, se crea el nuevo producto
-            Productos.create(nombre, idcategoria, precio, stock)
-            QMessageBox.information(self.view, "SISTEMA", "¡PRODUCTO AGREGADO CON EXITO!")
+    def mostrar_registrar_producto(self):
+        dialog = RegistrarProductoDialog(self.view)
+        if dialog.exec_():
+            # Refrescar el tablero de productos después del registro
             self.load_product()
-            self.clear_fields()
-        except ValueError:
-            QMessageBox.warning(self.view, "ERROR DE DATOS", "PORFAVOR INGRESA TODOS LOS DATOS CORRECTAMENTE")
-
 
 
     def agregar_o_descontar(self):
@@ -201,13 +133,13 @@ class IngresoController:
                     return  # Cancelar si el usuario no está de acuerdo
 
             # Pedir nueva categoría
-            categorias = ["PRODUCTO_VENTA", "INSUMO"]
+            categorias = ["VENTA", "INSUMO"]
             nueva_categoria, ok = QInputDialog.getItem(self.view, "EDITAR PRODUCTO", "SELECCIONA LA NUEVA CATEGORÍA:", categorias, 0, False)
             if not ok:
                 return  # Cancelar si no se selecciona una categoría
             
-            if nueva_categoria != ("PRODUCTO_VENTA" if producto.idcategoria == 1 else "INSUMO"):  # Si hay un cambio
-                confirm = QMessageBox.question(self.view, "Confirmación", f"¿Está seguro que desea cambiar la categoría de '{('PRODUCTO_VENTA' if producto.idcategoria == 1 else 'INSUMO')}' a '{nueva_categoria}'?", QMessageBox.Yes | QMessageBox.No)
+            if nueva_categoria != ("VENTA" if producto.idcategoria == 1 else "INSUMO"):  # Si hay un cambio
+                confirm = QMessageBox.question(self.view, "Confirmación", f"¿Está seguro que desea cambiar la categoría de '{('VENTA' if producto.idcategoria == 1 else 'INSUMO')}' a '{nueva_categoria}'?", QMessageBox.Yes | QMessageBox.No)
                 if confirm == QMessageBox.No:
                     return  # Cancelar si el usuario no está de acuerdo
 
@@ -233,7 +165,7 @@ class IngresoController:
                         return  # Cancelar si el usuario no está de acuerdo
 
             # Mapear la nueva categoría a su ID correspondiente
-            idcategoria = 1 if nueva_categoria == "PRODUCTO_VENTA" else 2
+            idcategoria = 1 if nueva_categoria == "VENTA" else 2
             
             # Actualizar el producto en la base de datos
             Productos.update(codigo, nuevo_nombre, idcategoria, nuevo_precio, nuevo_stock)
@@ -261,7 +193,7 @@ class IngresoController:
             
             # Diccionario para mapear IDs de categorías a nombres
             categoria_dict = {
-                1: "PRODUCTO_VENTA",
+                1: "VENTA",
                 2: "INSUMO"
             }
             
@@ -294,7 +226,7 @@ class IngresoController:
             
             # Diccionario para mapear IDs de categorías a nombres
             categoria_dict = {
-                1: "PRODUCTO_VENTA",
+                1: "VENTA",
                 2: "INSUMO"
             }
 
@@ -327,7 +259,7 @@ class IngresoController:
         
         # Mapear el nombre a su ID
         categoria_dict = {
-            "PRODUCTO_VENTA": 1,
+            "VENTA": 1,
             "INSUMO": 2
         }
         idcategoria = categoria_dict.get(categoria_nombre)  # Obtén el ID correspondiente
