@@ -4,6 +4,7 @@ from views.main_ui import main
 from controller.ingreso_controller import IngresoController
 from controller.pedidos_controller import PedidosController
 from controller.cotizaciones_controller import CotizacionesController
+from controller.clientes_controller import ClientesController
 from views.login_view import LoginView
 from model.database import get_connection
 
@@ -15,31 +16,40 @@ class MenuWindow(QMainWindow):
         self.view.pedidosButton.clicked.connect(self.pedidos)
         self.view.logoatButton.clicked.connect(self.logoat)
         self.view.cotizacionesButton.clicked.connect(self.cotizaciones)
+        self.view.clientes_button.clicked.connect(self.clientes)
 
     def ingresar(self):
-    
         self.show_product_management_view()   
 
     def pedidos(self):
-       
         self.show_pedidos_view()
     
     def cotizaciones(self):
         self.show_cotizaciones_view()
+
+    def clientes(self):
+        self.show_clientes_view()
+
+    def show_product_management_view(self):
+        self.product_controller = IngresoController()
+        self.view.close()
+        self.product_controller.view.show()
+    
+    def show_pedidos_view(self):
+        self.pedidoscontroller = PedidosController()
+        self.view.close()
+        self.pedidoscontroller.view.show()
     
     def show_cotizaciones_view(self):
         self.cotizacionescontroller = CotizacionesController()
+        self.view.close()
         self.cotizacionescontroller.view.show()
 
-    def show_pedidos_view(self):
-        self.pedidoscontroller = PedidosController()
-        self.pedidoscontroller.view.show()
-   
-    def show_product_management_view(self):
-        self.product_controller = IngresoController()
-        self.product_controller.view.show()
-
-
+    def show_clientes_view(self):
+        self.clientes_controller = ClientesController()
+        self.view.close()
+        self.clientes_controller.view.show()
+    
     def show_menu(self):
         self.menu_controller = MenuWindow()
         self.menu_controller.view.show()

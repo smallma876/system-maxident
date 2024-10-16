@@ -18,6 +18,9 @@ class PedidosController:
 
     def salir(self):
         self.view.close()
+        from controller.menu_controller import MenuWindow
+        self.menu_controller = MenuWindow()
+        self.menu_controller.view.show()
 
     def load_product(self):
         products = Pedidos.fetch_all()

@@ -1,9 +1,9 @@
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow
 
-class CotizacionesView(QMainWindow):
+class ClientesView(QMainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi('system-maxident/ui/cotizaciones.ui',self)
+        uic.loadUi('system-maxident/ui/clientes.ui',self)
 
         

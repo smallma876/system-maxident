@@ -1,13 +1,12 @@
 from model.database import get_connection
 
 class Clientes:
-    def __init__(self, idcliente, nombre, telefono, direccion, agencia_entrega, email,ruc_dni,forma_entrega):
+    def __init__(self, idcliente, nombre, telefono, direccion, agencia_entrega, ruc_dni,forma_entrega):
         self.idcliente = idcliente
         self.nombre = nombre
         self.telefono = telefono
         self.direccion = direccion
         self.agencia_entrega = agencia_entrega
-        self.email = email
         self.ruc_dni = ruc_dni
         self.forma_entrega = forma_entrega
 
@@ -15,7 +14,7 @@ class Clientes:
     def search_by_name(nombre):
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT idcliente, nombre, telefono, direccion, agencia_entrega, email, ruc_dni, forma_entrega FROM clientes WHERE nombre LIKE ?", ('%' + nombre + '%',))
+        cursor.execute("SELECT idcliente, nombre, telefono, direccion, agencia_entrega, ruc_dni, forma_entrega FROM clientes WHERE nombre LIKE ?", ('%' + nombre + '%',))
         
         rows = cursor.fetchall()  # Obtener todas las filas que coincidan
         conn.close()
@@ -34,20 +33,20 @@ class Clientes:
             return []
 
     @staticmethod
-    def create(nombre, telefono, direccion, agencia_entrega, email, ruc_dni, forma_entrega):
+    def create(nombre, telefono, direccion, agencia_entrega,ruc_dni, forma_entrega):
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO clientes (nombre, telefono, direccion, agencia_entrega, email, ruc_dni, forma_entrega) VALUES (?, ?, ?, ?, ?,?,?)",
-                       (nombre, telefono, direccion, agencia_entrega, email, ruc_dni, forma_entrega))
+        cursor.execute("INSERT INTO clientes (nombre, telefono, direccion, agencia_entrega, ruc_dni, forma_entrega) VALUES (?, ?, ?, ?, ?,?)",
+                       (nombre, telefono, direccion, agencia_entrega,ruc_dni, forma_entrega))
         conn.commit()
         conn.close()
 
     @staticmethod
-    def update(idcliente, nombre, telefono, direccion, agencia_entrega, email, ruc_dni, forma_entrega):
+    def update(idcliente, nombre, telefono, direccion, agencia_entrega, ruc_dni, forma_entrega):
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("UPDATE clientes SET nombre = ?, telefono = ?, direccion = ?, agencia_entrega = ?, email = ? ,ruc_dni = ?, forma_entrega = ? WHERE idcliente = ?",
-                       (nombre, telefono, direccion, agencia_entrega, email, idcliente, ruc_dni, forma_entrega))
+        cursor.execute("UPDATE clientes SET nombre = ?, telefono = ?, direccion = ?, agencia_entrega = ?, ruc_dni = ?, forma_entrega = ? WHERE idcliente = ?",
+                       (nombre, telefono, direccion, agencia_entrega, idcliente, ruc_dni, forma_entrega))
         conn.commit()
         conn.close()
 
@@ -55,7 +54,7 @@ class Clientes:
     def search(idcliente):
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT idcliente, nombre, telefono, direccion, agencia_entrega, email, ruc_dni, forma_entrega FROM clientes WHERE idcliente = ?", (idcliente,))
+        cursor.execute("SELECT idcliente, nombre, telefono, direccion, agencia_entrega, ruc_dni, forma_entrega FROM clientes WHERE idcliente = ?", (idcliente,))
         row = cursor.fetchone()
         conn.close()
         if row:

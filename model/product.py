@@ -73,13 +73,21 @@ class Productos:
         conn.close()
         return codigo_producto[0] if codigo_producto else None  # Devuelve el código o None si no existe
     
+    # Obtener productos para mostrar en la interfaz
+    @staticmethod
+    def obtener_productos(nombre):
+        conn = get_connection()
+        cursor = conn.cursor()
 
-    #def delete(codigo):
-        #conn = get_connection()
-        #cursor = conn.cursor()
-        #cursor.execute("DELETE FROM producto WHERE codigo = ?", (codigo,))
-        #conn.commit()
-        #conn.close()
+        cursor.execute("SELECT codigo FROM producto WHERE nombre = ?", (nombre,))
+        codigo = cursor.fetchone()  # Obtener un solo resultado
+
+        conn.close()
+
+        # Retornar el código si se encontró, o None si no hay resultados
+        return codigo[0] if codigo else None
+
+        
 
     
   

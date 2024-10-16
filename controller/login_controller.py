@@ -29,7 +29,7 @@ class LoginController:
             self.show_menu()  
 
         else:
-            QMessageBox.warning(self.view, "Login","Revisa tus datos!!",QMessageBox.Ok)
+            QMessageBox.warning(self.view, "Login","USUARIO O CONTRASEÑA INCORRECTO",QMessageBox.Ok)
 
     def authenticate(self, username, password):
         conn = get_connection()
@@ -50,7 +50,7 @@ class LoginController:
     
     def show_password_recovery(self, event):
         # Aquí puedes abrir una nueva ventana o lanzar un proceso para restablecer la contraseña
-        QMessageBox.information(self.view,"Recuperación de Contraseña", "Aquí puedes implementar la lógica de recuperación de contraseña.")
+        QMessageBox.information(self.view,"Recuperación de Contraseña", "Llamar al numero de soporte 969613558")
     
     def create_keypress_handler(self, original_keyPressEvent):
         # Este método crea un manejador personalizado para el evento de keypress sin bloquear el comportamiento original

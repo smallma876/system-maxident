@@ -6,22 +6,23 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>835</width>
-    <height>332</height>
+    <width>943</width>
+    <height>667</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: qlineargradient(spread:pad, x1:0.487, y1:1, x2:0.478, y2:0.636364, stop:0 rgb(0, 255, 102), stop:1 rgba(255, 255, 255, 255));</string>
+   <string notr="true">background-color: qlineargradient(spread:pad, x1:0.487, y1:1, x2:0.478, y2:0.636364, stop:0 rgb(0, 255, 102), stop:1 rgb(2, 122, 20));
+</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QLabel" name="label_6">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>0</y>
+      <y>10</y>
       <width>391</width>
       <height>51</height>
      </rect>
@@ -34,19 +35,21 @@
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(255, 255, 255);</string>
+     <string notr="true">background-color:  rgb(2, 122, 20);
+
+color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
      <string>Historial de Cotizaciones</string>
     </property>
    </widget>
-   <widget class="QTableWidget" name="cotizacionTable">
+   <widget class="QTableWidget" name="tabla_cotizaciones">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>70</y>
-      <width>761</width>
-      <height>192</height>
+      <x>80</x>
+      <y>110</y>
+      <width>801</width>
+      <height>411</height>
      </rect>
     </property>
     <property name="font">
@@ -135,11 +138,11 @@
      </property>
     </column>
    </widget>
-   <widget class="QPushButton" name="addButton">
+   <widget class="QPushButton" name="btn_editar">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>270</y>
+      <x>160</x>
+      <y>580</y>
       <width>171</width>
       <height>31</height>
      </rect>
@@ -159,11 +162,11 @@ color: rgb(0, 0, 0)</string>
      <string>Editar </string>
     </property>
    </widget>
-   <widget class="QPushButton" name="addButton_2">
+   <widget class="QPushButton" name="btn_salir">
     <property name="geometry">
      <rect>
-      <x>530</x>
-      <y>270</y>
+      <x>640</x>
+      <y>580</y>
       <width>171</width>
       <height>31</height>
      </rect>
@@ -183,11 +186,11 @@ color: rgb(255, 255, 255);</string>
      <string>Salir</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="addButton_3">
+   <widget class="QPushButton" name="btn_buscar">
     <property name="geometry">
      <rect>
-      <x>340</x>
-      <y>270</y>
+      <x>390</x>
+      <y>580</y>
       <width>171</width>
       <height>31</height>
      </rect>

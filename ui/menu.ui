@@ -155,7 +155,7 @@ color: rgb(255, 255, 255);</string>
      <string>Cotizaciones</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="cotizaciones_button_2">
+   <widget class="QPushButton" name="clientes_button">
     <property name="geometry">
      <rect>
       <x>610</x>
@@ -179,7 +179,6 @@ color: rgb(255, 255, 255);</string>
     </property>
    </widget>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources>
   <include location="Imagenes/imagenes dent.qrc"/>
