@@ -4,6 +4,6 @@ from PyQt5.QtWidgets import QMainWindow
 class main(QMainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi('system-maxident/ui/menu.ui',self)
+        uic.loadUi('ui/menu.ui',self)
 
  

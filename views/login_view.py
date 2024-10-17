@@ -10,4 +10,4 @@ class LoginView(QMainWindow):
         #super().__init__(): Llama al constructor de la clase base (QMainWindow) para asegurarse de que la ventana principal se 
         # inicialice correctamente.
         super().__init__()
-        uic.loadUi('system-maxident/ui/login.ui',self)
+        uic.loadUi('ui/login.ui',self)

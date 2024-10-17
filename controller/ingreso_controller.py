@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QTableWidget
 from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem
 from views.product_management_view import ProductManagementView
 from controller.registrar_producto_dialog import RegistrarProductoDialog
+from controller.editar_producto_dialog import EditarProductoDialog
 from model.product import Productos
 import openpyxl
 from PyQt5.QtWidgets import QFileDialog
@@ -113,71 +114,9 @@ class IngresoController:
 
     
     def update_product(self):
-        try:
-            # Obtener el código del producto seleccionado
-            codigo = self.view.idproductoInput.text()
-            producto = Productos.search(codigo)  # Busca el producto en la base de datos
-            
-            if not producto:
-                QMessageBox.warning(self.view, "Error", "SELECCIONA UN PRODUCTO.")
-                return
-            
-            # Pedir nuevo nombre
-            nuevo_nombre, ok = QInputDialog.getText(self.view, "EDITAR PRODUCTO", "NUEVO NOMBRE DEL PRODUCTO:", text=producto.nombre)
-            if not ok or not nuevo_nombre:
-                return  # Cancelar si no se ingresa un nuevo nombre
-            if nuevo_nombre != producto.nombre:  # Si hay un cambio
-                nuevo_nombre = nuevo_nombre.upper()
-                confirm = QMessageBox.question(self.view, "Confirmación", f"¿Está seguro que desea cambiar el nombre de '{producto.nombre}' a '{nuevo_nombre}'?", QMessageBox.Yes | QMessageBox.No)
-                if confirm == QMessageBox.No:
-                    return  # Cancelar si el usuario no está de acuerdo
+            # Obtener los datos de los campos
+        pass
 
-            # Pedir nueva categoría
-            categorias = ["VENTA", "INSUMO"]
-            nueva_categoria, ok = QInputDialog.getItem(self.view, "EDITAR PRODUCTO", "SELECCIONA LA NUEVA CATEGORÍA:", categorias, 0, False)
-            if not ok:
-                return  # Cancelar si no se selecciona una categoría
-            
-            if nueva_categoria != ("VENTA" if producto.idcategoria == 1 else "INSUMO"):  # Si hay un cambio
-                confirm = QMessageBox.question(self.view, "Confirmación", f"¿Está seguro que desea cambiar la categoría de '{('VENTA' if producto.idcategoria == 1 else 'INSUMO')}' a '{nueva_categoria}'?", QMessageBox.Yes | QMessageBox.No)
-                if confirm == QMessageBox.No:
-                    return  # Cancelar si el usuario no está de acuerdo
-
-            # Pedir nuevo stock
-            nuevo_stock, ok = QInputDialog.getInt(self.view, "EDITAR PRODUCTO", "NUEVO STOCK DEL PRODUCTO:", value=producto.stock, min=0, max=1000000)
-            if not ok:
-                return  # Cancelar si no se ingresa un nuevo stock
-            if nuevo_stock != producto.stock:  # Si hay un cambio
-                confirm = QMessageBox.question(self.view, "Confirmación", f"¿Está seguro que desea cambiar el stock de {producto.stock} a {nuevo_stock}?", QMessageBox.Yes | QMessageBox.No)
-                if confirm == QMessageBox.No:
-                    return  # Cancelar si el usuario no está de acuerdo
-
-            # Si la categoría es "INSUMO", no se debe pedir precio y se establece en 0
-            if nueva_categoria == "INSUMO":
-                nuevo_precio = 0.0
-            else:
-                nuevo_precio, ok = QInputDialog.getDouble(self.view, "EDITAR PRODUCTO", "NUEVO PRECIO DEL PRODUCTO:", value=producto.precio, min=0, max=1000000, decimals=2)
-                if not ok:
-                    return  # Cancelar si no se ingresa un nuevo precio
-                if nuevo_precio != producto.precio:  # Si hay un cambio
-                    confirm = QMessageBox.question(self.view, "Confirmación", f"¿Está seguro que desea cambiar el precio de {producto.precio:.2f} a {nuevo_precio:.2f}?", QMessageBox.Yes | QMessageBox.No)
-                    if confirm == QMessageBox.No:
-                        return  # Cancelar si el usuario no está de acuerdo
-
-            # Mapear la nueva categoría a su ID correspondiente
-            idcategoria = 1 if nueva_categoria == "VENTA" else 2
-            
-            # Actualizar el producto en la base de datos
-            Productos.update(codigo, nuevo_nombre, idcategoria, nuevo_precio, nuevo_stock)
-            
-            # Mostrar mensaje de éxito
-            QMessageBox.information(self.view, "Sistema", "PRODUCTO ACTUALIZADO CON ÉXITO")
-            
-            # Recargar los productos en la tabla
-            self.load_product()
-
-        except ValueError:
-            QMessageBox.warning(self.view, "Error de Datos", "POR FAVOR INGRESA TODOS LOS DATOS CORRECTAMENTE")
 
     def load_updated_product(self, codigo):
         producto = Productos.search(codigo)

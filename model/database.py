@@ -6,7 +6,7 @@ import pyodbc
 def get_connection():
     connection = pyodbc.connect(
         'DRIVER={ODBC Driver 17 for SQL Server};'
-        'SERVER=DESKTOP-2GU3A1F\SQLEXPRESS;'
+        'SERVER=DESKTOP-2GU3A1F\\SQLEXPRESS;'
         'DATABASE=MAX&DENT;'
         'Trusted_Connection=yes;'
     )
