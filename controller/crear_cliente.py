@@ -94,6 +94,18 @@ class CrearClienteDialog(QDialog):
             return
         else:
             nombre = nombre.upper()
+
+        # Preguntar al usuario si está seguro de registrar el producto
+            confirmacion = QMessageBox.question(
+                self, 
+                "Confirmar", 
+                f"¿Está seguro de que desea registrar este cliente '{nombre}'?",
+                QMessageBox.Yes | QMessageBox.No
+            )
+
+            if confirmacion == QMessageBox.No:
+                return  # Si el usuario selecciona "No", cancelar la operación
+
         
         # Intentar registrar el cliente
         try:

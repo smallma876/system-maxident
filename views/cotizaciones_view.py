@@ -4,6 +4,6 @@ from PyQt5.QtWidgets import QMainWindow
 class CotizacionesView(QMainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi('ui/cotizaciones.ui',self)
+        uic.loadUi('system-maxident/ui/cotizaciones.ui',self)
 
         

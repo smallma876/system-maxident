@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QInputDialog
+from PyQt5.QtWidgets import QInputDialog,QDialog
 from PyQt5.QtWidgets import QTableWidget
 from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem
 from views.product_management_view import ProductManagementView
@@ -115,7 +115,48 @@ class IngresoController:
     
     def update_product(self):
             # Obtener los datos de los campos
-        pass
+        row = self.view.productTable.currentRow()
+        if row == -1:
+            QMessageBox.warning(self.view, "ERROR", "Por favor selecciona un producto para editar.")
+            return
+
+        # Obtener datos actuales del cliente seleccionado
+        codigo = self.view.productTable.item(row, 0).text()
+        nombre_actual = self.view.productTable.item(row, 1).text()
+        categoria_nombre = self.view.productTable.item(row, 2).text()
+        precio_actual = self.view.productTable.item(row, 3).text()
+        stock_actual = self.view.productTable.item(row, 4).text()
+
+        idcategoria = 1 if categoria_nombre =="VENTA" else 2
+
+        dialogo = EditarProductoDialog(nombre_actual,idcategoria,precio_actual,stock_actual)
+        if dialogo.exec_() == QDialog.Accepted:
+            # Obtener los valores del formulario
+            nuevo_nombre = dialogo.nombre_input.text().upper()
+            categoria = dialogo.categoria_input.currentText()
+            nuevo_precio = dialogo.precio_input.text()
+            nuevo_stock = dialogo.stock_input.text()
+
+                # Mapear la nueva categoría al ID
+            if categoria == "VENTA":
+                idcategoria = 1
+            elif categoria == "INSUMO":
+                idcategoria = 2
+            else:
+                QMessageBox.warning(self.view, "Error", "Categoría no válida.")
+                return
+            
+            # Confirmar cambios
+            confirmar = QMessageBox.question(self.view, "Confirmar", "¿Seguro que deseas actualizar este producto?", QMessageBox.Yes | QMessageBox.No)
+            if confirmar == QMessageBox.No:
+                return
+            
+            Productos.update(codigo,nuevo_nombre,idcategoria,nuevo_precio,nuevo_stock)
+            QMessageBox.information(self.view, "Éxito", "Producto actualizado correctamente.")
+
+            # Refrescar tabla
+            self.load_product()
+
 
 
     def load_updated_product(self, codigo):
@@ -205,7 +246,6 @@ class IngresoController:
 
         precio = self.view.productTable.item(row, 3).text()
         stock = self.view.productTable.item(row, 4).text()
-
         self.view.idproductoInput.setText(codigo)
         self.view.nombreInput.setText(nombre)
         

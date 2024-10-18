@@ -49,7 +49,7 @@ class Productos:
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("UPDATE producto SET nombre = ?, idcategoria = ?, precio = ?, stock = ? WHERE codigo = ?",
-                    (nombre,idcategoria, precio, stock,codigo))
+                    (nombre, idcategoria, precio, stock, codigo))
         conn.commit()
         conn.close()
 

@@ -96,7 +96,6 @@ class ClientesController:
             confirmar = QMessageBox.question(self.view, "Confirmar", "¿Seguro que deseas actualizar este cliente?", QMessageBox.Yes | QMessageBox.No)
             if confirmar == QMessageBox.No:
                 return
-            
 
             # Actualizar en la base de datos
             Clientes.update(idcliente, nuevo_nombre, nuevo_telefono, nueva_direccion, nueva_agencia_entrega, nuevo_ruc_dni, nueva_forma_entrega)

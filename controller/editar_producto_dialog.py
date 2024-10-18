@@ -1,10 +1,8 @@
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QFormLayout, QLineEdit, QHBoxLayout, QPushButton, QComboBox, QMessageBox
 from model.product import Productos
 class EditarProductoDialog(QDialog):
-    def __init__(self, producto, parent=None):
+    def __init__(self, nombre_actual,idcategoria,precio_actual,stock_actual, parent=None):
         super().__init__(parent)
-        self.producto = producto
-
         # Layout principal
         layout = QVBoxLayout(self)
 
@@ -13,26 +11,26 @@ class EditarProductoDialog(QDialog):
 
         # Campos de edición
         self.nombre_input = QLineEdit(self)
-        self.nombre_input.setText(producto.nombre)  # Cargar el nombre del producto actual
+        self.nombre_input.setText(nombre_actual)  # Cargar el nombre del producto actual
         form_layout.addRow("Nombre del Producto:", self.nombre_input)
 
         # Cambiar QLineEdit por QComboBox para la categoría
         self.categoria_input = QComboBox(self)
         self.categoria_input.addItems(["VENTA", "INSUMO"])  # Añadir opciones
         # Seleccionar la categoría actual
-        if producto.idcategoria == 1:
+        if idcategoria == 1:
             self.categoria_input.setCurrentIndex(0)
         else:
             self.categoria_input.setCurrentIndex(1)
         form_layout.addRow("Categoría:", self.categoria_input)
 
-        self.stock_input = QLineEdit(self)
-        self.stock_input.setText(str(producto.stock))  # Cargar el stock actual
-        form_layout.addRow("Stock:", self.stock_input)
-
         self.precio_input = QLineEdit(self)
-        self.precio_input.setText(str(producto.precio))  # Cargar el precio actual
+        self.precio_input.setText(str(precio_actual))  # Cargar el stock actual
         form_layout.addRow("Precio por mayor:", self.precio_input)
+
+        self.stock_input = QLineEdit(self)
+        self.stock_input.setText(str(stock_actual))  # Cargar el precio actual
+        form_layout.addRow("Stock:", self.stock_input)
 
         layout.addLayout(form_layout)
         button_layout = QHBoxLayout()
@@ -40,7 +38,7 @@ class EditarProductoDialog(QDialog):
         # Botón Aceptar (Editar)
         self.ok_button = QPushButton("Editar Producto", self)
         self.ok_button.setFixedSize(170, 40)  # Tamaño del botón
-        self.ok_button.clicked.connect(self.editar_producto)
+        self.ok_button.clicked.connect(self.accept)
         button_layout.addWidget(self.ok_button)
 
         # Botón Cancelar
@@ -91,34 +89,3 @@ class EditarProductoDialog(QDialog):
                 background-color: #046697;
             }
         """)
-
-    def editar_producto(self):
-        try:
-            # Obtener los datos de los campos
-            
-            
-            nombre = self.nombre_input.text()
-            categoria = self.categoria_input.currentText()
-            stock = int(self.stock_input.text())
-            precio = float(self.precio_input.text())
-
-            # Validaciones de entrada
-            if not nombre or stock < 0 or precio < 0:
-                QMessageBox.warning(self, "Error", "Por favor, completa todos los campos correctamente.")
-                return
-
-            # Convertir la categoría a ID
-            idcategoria = 1 if categoria == "VENTA" else 2
-
-            # Lógica para actualizar el producto en la base de datos
-            success = Productos.update(codigo, nombre, idcategoria, precio, stock)
-
-            if success:
-                QMessageBox.information(self, "Éxito", "Producto actualizado con éxito.")
-                self.accept()  # Cerrar el diálogo si la actualización fue exitosa
-            else:
-                QMessageBox.warning(self, "Error", "Error al actualizar el producto. Intente de nuevo.")
-        except Exception as e:
-            QMessageBox.critical(self, "Error", f"Ocurrió un error: {e}")
-
-           

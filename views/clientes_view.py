@@ -4,6 +4,6 @@ from PyQt5.QtWidgets import QMainWindow
 class ClientesView(QMainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi('ui/clientes.ui',self)
+        uic.loadUi('system-maxident/ui/clientes.ui',self)
 
         
